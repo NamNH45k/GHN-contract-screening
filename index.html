@@ -67,6 +67,15 @@
             <h3>Hộp thư tiếp nhận</h3>
             <span class="live-indicator">LIVE CONNECTION</span>
           </div>
+          
+          <!-- Direct Word (.docx) File Upload Box -->
+          <div class="upload-box-container" style="padding: 10px 16px; border-bottom: 1px solid var(--border-color); background: #ffffff;">
+            <label for="docx-upload-input" class="btn-docx-upload" style="display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; width: 100%; text-align: center; border: 1px dashed var(--accent); background: rgba(255, 108, 10, 0.02); color: var(--accent); padding: 8px 12px; border-radius: 8px; font-weight: 700; font-size: 0.78rem; transition: var(--transition);">
+              <span>📂</span> Tải trực tiếp file Word (.docx)
+            </label>
+            <input type="file" id="docx-upload-input" accept=".docx" style="display: none;" />
+          </div>
+
           <div class="contracts-list" id="contracts-list-container">
             <!-- Dynamic contract list items -->
           </div>
@@ -232,6 +241,7 @@
   </div>
 
   <!-- JavaScript and Database -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
   <script src="mock_db.js"></script>
   <script src="app.js"></script>
 </body>

@@ -721,15 +721,23 @@ document.addEventListener("DOMContentLoaded", () => {
   const performVerbatimCompare = async (contract, statusBadge) => {
     try {
       const templateId = contract.selectedTemplate;
-      const baseName = contract.fileName.substring(0, contract.fileName.lastIndexOf('.')) || contract.fileName;
-      const contractJsPath = `./temp/${baseName}.js`;
+      
+      let contractText = "";
+      if (contract.inMemoryText) {
+        contractText = contract.inMemoryText;
+        // Only load standard template script since target is already in memory
+        await loadLocalScript(`./temp/${templateId}.js`);
+      } else {
+        const baseName = contract.fileName.substring(0, contract.fileName.lastIndexOf('.')) || contract.fileName;
+        const contractJsPath = `./temp/${baseName}.js`;
 
-      await Promise.all([
-        loadLocalScript(contractJsPath),
-        loadLocalScript(`./temp/${templateId}.js`)
-      ]);
+        await Promise.all([
+          loadLocalScript(contractJsPath),
+          loadLocalScript(`./temp/${templateId}.js`)
+        ]);
+        contractText = window.CONTRACT_TEXT;
+      }
 
-      const contractText = window.CONTRACT_TEXT;
       const templateText = window[`TEMPLATE_TEXT_${templateId}`];
 
       if (contractText === undefined || templateText === undefined) {
@@ -1175,6 +1183,67 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   };
+
+  // Set up Word File Upload (.docx) Change Listener
+  const docxUploadInput = document.getElementById("docx-upload-input");
+  if (docxUploadInput) {
+    docxUploadInput.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      // Check if mammoth library is loaded
+      if (typeof mammoth === "undefined") {
+        alert("Lỗi: Thư viện mammoth.js chưa được tải thành công. Vui lòng kiểm tra kết nối mạng!");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const arrayBuffer = event.target.result;
+        mammoth.extractRawText({ arrayBuffer: arrayBuffer })
+          .then((result) => {
+            const extractedText = result.value;
+            if (!extractedText || extractedText.trim() === "") {
+              alert("Không thể đọc được nội dung chữ từ tệp Word này. Đảm bảo đây không phải tệp rỗng.");
+              return;
+            }
+
+            const newId = "upload_" + Date.now();
+            const newContract = {
+              id: newId,
+              fileName: file.name,
+              receivedDate: new Date().toLocaleDateString("vi-VN") + " (Tải lên)",
+              sender: "Người dùng (Upload)",
+              fileSize: (file.size / (1024 * 1024)).toFixed(2) + " MB",
+              group: "b",
+              status: "Chờ đối soát",
+              selectedTemplate: null,
+              inMemoryText: extractedText
+            };
+
+            CONTRACTS_DB.unshift(newContract);
+            saveToLocalStorage();
+            
+            // Clear file input value to allow uploading same file again
+            docxUploadInput.value = "";
+
+            updateStats();
+            renderContractsList();
+            selectContract(newId);
+            
+            alert(`Tải file "${file.name}" thành công! Vui lòng chọn mẫu hợp đồng chuẩn để đối soát.`);
+          })
+          .catch((err) => {
+            console.error("Mammoth error:", err);
+            alert("Có lỗi xảy ra khi đọc tệp tin Word: " + err.message);
+          });
+      };
+      reader.onerror = (err) => {
+        alert("Không thể đọc tệp tin: " + err.message);
+      };
+      reader.readAsArrayBuffer(file);
+    });
+  }
 
   // Start
   setupCompareSideNav();
