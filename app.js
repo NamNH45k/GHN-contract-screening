@@ -6,12 +6,12 @@ document.addEventListener("DOMContentLoaded", () => {
   let activeContractId = null;
 
   const TEMPLATE_MAP = {
-    "buu_cuc": "Hợp đồng thuê bưu cục (Mẫu có cọc)",
-    "ktc": "Hợp đồng thuê kho bãi KTC",
-    "tai": "Hợp đồng vận chuyển (Thuê tải trung chuyển)",
-    "khach_hang": "Hợp đồng khách hàng (Cung cấp dịch vụ giao chặng cuối)",
-    "finetoday": "HĐ Bưu Chính B2B (Dự án Fine Today)",
-    "non_ecom": "Hợp đồng khách hàng Non-ecom (Mẫu chuẩn)"
+    "buu_cuc": "Hợp đồng thuê bưu cục",
+    "ktc": "Hợp đồng thuê KTC",
+    "tai": "Hợp đồng thuê tải",
+    "khach_hang": "Hợp đồng khách hàng SME",
+    "finetoday": "Hợp đồng B2B",
+    "non_ecom": "Hợp đồng Non-ecom"
   };
 
   // Load contracts from localStorage if available
