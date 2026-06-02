@@ -125,8 +125,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const origUpper = (originalText || "").toUpperCase();
     const modUpper = (modifiedText || "").toUpperCase();
 
-    // 1. Preamble & Customer Details: If clause is the default "ĐIỀU KHOẢN CHUNG" or starts with "CĂN CỨ"
-    if (clauseUpper === "ĐIỀU KHOẢN CHUNG" || clauseUpper.startsWith("CĂN CỨ")) {
+    // 1. Preamble & Customer Details: If clause contains "ĐIỀU KHOẢN CHUNG", "ĐIỀU KHOẢN THI HÀNH", or starts with "CĂN CỨ"
+    if (clauseUpper.includes("ĐIỀU KHOẢN CHUNG") || clauseUpper.includes("ĐIỀU KHOẢN THI HÀNH") || clauseUpper.startsWith("CĂN CỨ")) {
+      return true;
+    }
+
+    // 1.5 Bracketed placeholders (like [HỌ TÊN], [CHỨC VỤ], etc.) in signature block
+    if (/\[[A-ZÀ-Ỹ\s]+\]/.test(originalText || "") || /\[[A-ZÀ-Ỹ\s]+\]/.test(modifiedText || "")) {
       return true;
     }
 
@@ -778,9 +783,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const realDeviations = diffResults.filter(d => !d.isPlaceholder);
       const placeholderFills = diffResults.filter(d => d.isPlaceholder);
 
-      // Filter out preamble (ĐIỀU KHOẢN CHUNG / CĂN CỨ) from placeholder cards entirely
+      // Filter out preamble and signature clauses from placeholder cards entirely
       const otherPlaceholders = placeholderFills.filter(item => 
-        item.clause !== "ĐIỀU KHOẢN CHUNG" && !item.clause.startsWith("CĂN CỨ")
+        !item.clause.includes("ĐIỀU KHOẢN CHUNG") && !item.clause.includes("ĐIỀU KHOẢN THI HÀNH") && !item.clause.startsWith("CĂN CỨ")
       );
 
       const qtyTotalChangesEl = document.getElementById("qty-total-changes");
