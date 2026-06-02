@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Contract Screening</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <div class="header">
+      <!-- Official GHN Logo -->
+      <img src="https://cdn.hstatic.net/themes/200000472237/1001423864/14/logo.png?v=2850" alt="Giao Hàng Nhanh" style="height: 24px; width: auto; object-fit: contain;">
+      <span style="font-size: 0.8rem; font-weight: 700; color: var(--accent-color); margin-left: auto;">Legal AI</span>
+    </div>
+    
+    <!-- Security Mode Badge -->
+    <div class="status-panel">
+      <div class="status-row">
+        <span class="label">Chế độ hoạt động:</span>
+        <span class="status-badge adhoc-mode">Chỉ quét Ad-hoc (Bảo mật)</span>
+      </div>
+      <div class="status-row">
+        <span class="label">Đồng bộ tự động:</span>
+        <span class="status-badge disabled-mode">ĐÃ TẮT</span>
+      </div>
+    </div>
+
+    <!-- Ad-hoc link screening section -->
+    <div class="adhoc-section">
+      <h3>Rà soát liên kết tùy chọn</h3>
+      <div class="input-group">
+        <input type="text" id="adhoc-url-input" placeholder="Dán link Haraworks / Lisa chứa hợp đồng...">
+        <button class="btn btn-primary btn-small" id="btn-scan-url">Gửi Link Screen</button>
+      </div>
+    </div>
+
+    <div class="action-section">
+      <button class="btn btn-primary" id="btn-scan-current-tab">Rà soát trang hiện tại (Active Tab)</button>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-num" id="stat-scanned">12</span>
+        <span class="stat-label">Hợp đồng đã duyệt</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num" id="stat-pushed">9</span>
+        <span class="stat-label font-small">Lịch sử gửi Ad-hoc</span>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span>GHN Legal AI Assistant v1.1.0</span>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

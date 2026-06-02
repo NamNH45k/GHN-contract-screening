@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bản đồ Kỹ năng Chuyên môn (Skill Matrix) - PO, Dev, UI/UX & Tester</title>
+  <meta name="description" content="Khám phá chi tiết các bộ kỹ năng chuyên môn (Hard Skills), kỹ năng mềm (Soft Skills) và công cụ tối thiểu dành cho các vai trò Product Owner, Frontend/Backend Developer, UI/UX Designer và Software Tester.">
+  <meta name="author" content="Antigravity AI">
+  
+  <!-- Styling Sheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Premium Ambient Glow Effects -->
+  <div class="bg-blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <!-- Main Application Layout -->
+  <div class="app-container" id="app-root-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar-navigation">
+      <div class="brand-section">
+        <span class="brand-logo">⌘</span>
+        <span class="brand-title">SkillMatrix</span>
+      </div>
+      
+      <nav aria-label="Danh sách vai trò">
+        <p class="nav-label">Phân chia vai trò</p>
+        <ul class="role-nav-list" id="role-list">
+          <li class="role-nav-item active" data-role="product_owner">
+            <button id="btn-po" aria-label="Product Owner Skill Set">
+              <span>🎯</span> Product Owner
+            </button>
+          </li>
+          <li class="role-nav-item" data-role="frontend_developer">
+            <button id="btn-fed" aria-label="Frontend Developer Skill Set">
+              <span>💻</span> Frontend Dev
+            </button>
+          </li>
+          <li class="role-nav-item" data-role="backend_developer">
+            <button id="btn-bed" aria-label="Backend Developer Skill Set">
+              <span>⚙️</span> Backend Dev
+            </button>
+          </li>
+          <li class="role-nav-item" data-role="uiux_designer">
+            <button id="btn-uiux" aria-label="UI/UX Designer Skill Set">
+              <span>🎨</span> UI/UX Designer
+            </button>
+          </li>
+          <li class="role-nav-item" data-role="tester">
+            <button id="btn-tester" aria-label="Software Tester Skill Set">
+              <span>🔍</span> Tester (QA)
+            </button>
+          </li>
+        </ul>
+
+        <p class="nav-label" style="margin-top: 2rem;">Bản đồ tổng quan</p>
+        <ul class="role-nav-list">
+          <li class="role-nav-item" data-mode="compare">
+            <button id="nav-compare-btn" aria-label="Compare all roles side by side">
+              <span>⚔️</span> So sánh vai trò
+            </button>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <p>Bản đồ Kỹ năng & Năng lực</p>
+        <p style="margin-top: 0.25rem;">© 2026 Developer System</p>
+      </div>
+    </aside>
+
+    <!-- Main Dashboard Workspace -->
+    <main id="main-content">
+      
+      <!-- Upper Header: Role Info, Search, and Tab Switching -->
+      <header id="dashboard-header">
+        <div class="role-intro">
+          <div class="role-title-container">
+            <span class="role-icon" id="role-icon">🎯</span>
+            <h1 class="role-name" id="role-name">Product Owner</h1>
+          </div>
+          <p class="role-desc" id="role-desc">
+            Chịu trách nhiệm định hình tầm nhìn sản phẩm, tối ưu hóa giá trị của sản phẩm được tạo ra bởi nhóm phát triển, quản lý Product Backlog hiệu quả và kết nối các bên liên quan.
+          </p>
+        </div>
+
+        <div class="controls-section">
+          <!-- Search box -->
+          <div class="search-box">
+            <input type="text" id="search-input" placeholder="Tìm kỹ năng, công cụ..." aria-label="Tìm kiếm kỹ năng">
+          </div>
+
+          <!-- Mode switching -->
+          <div class="mode-toggle" id="view-mode-tabs" role="tablist">
+            <button class="toggle-btn active" id="tab-explore" role="tab" aria-selected="true" aria-controls="skills-container">
+              Chi tiết kỹ năng
+            </button>
+            <button class="toggle-btn" id="tab-checklist" role="tab" aria-selected="false" aria-controls="skills-container">
+              Đánh giá năng lực
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Dynamic Performance Metrics Cards -->
+      <section class="metrics-board" id="metrics-board" aria-label="Bảng chỉ số năng lực">
+        <!-- Will be populated dynamically via JavaScript -->
+      </section>
+
+      <!-- Main Skills Cards Grid -->
+      <section id="skills-container" aria-label="Danh sách các kỹ năng chuyên môn">
+        <!-- Will be populated dynamically via JavaScript -->
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Loaded Data and Script Files -->
+  <script src="skills_data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

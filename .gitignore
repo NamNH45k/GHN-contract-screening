@@ -1,0 +1,8 @@
+.DS_Store
+Thumbs.db
+node_modules/
+.env
+.gemini/
+__pycache__/
+*.pyc
+git/

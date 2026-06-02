@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GHN Legal AI - Hệ thống đối soát hợp đồng</title>
+  <meta name="description" content="Trung tâm quản lý tập trung, tự động phân loại và đối soát hợp đồng thông minh bằng trí tuệ nhân tạo.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside>
+      <div class="brand">
+        <!-- Official GHN Logo -->
+        <img src="https://cdn.hstatic.net/themes/200000472237/1001423864/14/logo.png?v=2850" alt="Giao Hàng Nhanh" style="height: 38px; width: auto; object-fit: contain;">
+      </div>
+
+      <nav>
+        <p class="section-title">Danh mục Hợp đồng</p>
+        <ul class="nav-menu">
+          <li class="active" data-filter="all">
+            <button><span>📁</span> Tất cả hợp đồng</button>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <p>Phân hệ Legal AI Engine</p>
+        <p>Phiên bản WebApp 1.0</p>
+      </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main>
+      
+      <!-- Top Header -->
+      <header>
+        <div class="header-title">
+          <h1>Danh sách tiếp nhận & Đối soát</h1>
+        </div>
+        
+        <div class="stats-overview">
+          <div class="stat-box">
+            <span class="stat-num" id="total-cnt">0</span>
+            <span class="stat-lbl">Tổng tiếp nhận</span>
+          </div>
+          <div class="stat-box warning">
+            <span class="stat-num" id="a-cnt">0</span>
+            <span class="stat-lbl">Cần Legal Review</span>
+          </div>
+          <div class="stat-box success">
+            <span class="stat-num" id="b-cnt">0</span>
+            <span class="stat-lbl">Đã đối soát</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Grid layout: Left is List, Right is Work Panel (Compare/Review Details) -->
+      <div class="dashboard-grid">
+        
+        <!-- Left Panel: Received Contracts List -->
+        <section class="list-section" aria-label="Danh sách hợp đồng tiếp nhận">
+          <div class="section-header">
+            <h3>Hộp thư tiếp nhận</h3>
+            <span class="live-indicator">LIVE CONNECTION</span>
+          </div>
+          <div class="contracts-list" id="contracts-list-container">
+            <!-- Dynamic contract list items -->
+          </div>
+        </section>
+
+        <!-- Right Panel: Detailed Work Area -->
+        <section class="work-section" aria-label="Chi tiết xử lý và so sánh">
+          
+          <!-- Default Empty State -->
+          <div class="work-empty-state" id="work-empty-state">
+            <div class="empty-icon">📂</div>
+            <h3>Chi tiết xử lý hợp đồng</h3>
+            <p>Chọn một hợp đồng từ danh sách bên trái để tiến hành rà soát hoặc xem báo cáo đối sánh tự động từ AI.</p>
+          </div>
+
+          <!-- Group A: Legal Review Needed Panel -->
+          <div class="review-panel-a" id="panel-group-a" style="display: none;">
+            <div class="panel-header">
+              <span class="badge badge-danger">NHÓM (A) • CẦN LEGAL REVIEW</span>
+              <h2 id="review-title-a">Hợp đồng mẫu đối tác</h2>
+            </div>
+            
+            <div class="panel-body">
+              <div class="warning-box">
+                <h4>Lý do AI phân loại vào Nhóm (a):</h4>
+                <p id="review-reason-a"></p>
+              </div>
+
+              <div class="workflow-status">
+                <h3>Nhật ký hành động tự động (Workflow)</h3>
+                <div class="timeline" id="review-timeline-a">
+                  <!-- Notifications status -->
+                </div>
+              </div>
+
+              <div class="action-buttons-group">
+                <button class="btn btn-primary" onclick="alert('Đã tải xuống tệp hợp đồng nguyên bản để rà soát.')">📥 Tải xuống hợp đồng (.docx)</button>
+                <button class="btn btn-secondary" onclick="alert('Hệ thống đã gửi lời nhắc khẩn cấp lần 2 cho Legal Team trên Harawork.')">🔔 Nhắc nhở Legal Team</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Group B: Compare Template Panel -->
+          <div class="review-panel-b" id="panel-group-b" style="display: none;">
+            <div class="panel-header-sticky">
+              <div class="panel-header-top">
+                <span class="badge badge-success">NHÓM (B) • ĐỐI CHIẾU THEO MẪU</span>
+                <div class="panel-actions">
+                  <button class="btn-icon" title="Tải báo cáo đối soát PDF" onclick="alert('Đang kết xuất và tải xuống Báo cáo đối soát thông tin và điều khoản dưới dạng PDF...')">📥 Tải Báo cáo PDF</button>
+                  <button class="btn btn-primary" onclick="alert('Hợp đồng đã được duyệt thông qua các điều khoản sửa đổi. Đang cập nhật trạng thái...')">✓ Phê duyệt</button>
+                </div>
+              </div>
+              <h2 id="review-title-b">HD_CungCap_DichVu_FPT_Signed.pdf</h2>
+              
+              <!-- Manual Template Selection Dropdown -->
+              <div class="manual-template-selector" style="margin-top: 10px; padding: 10px 14px; background: rgba(255, 255, 255, 0.02); border: 1px dashed rgba(255, 255, 255, 0.15); border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="font-size: 0.85rem; font-weight: 700; color: var(--warning);">Mẫu đối chiếu chuẩn:</span>
+                  <select id="select-template-type" style="background: #0f101a; color: #fff; border: 1px solid rgba(255,255,255,0.12); padding: 5px 12px; border-radius: 6px; font-family: inherit; font-size: 0.78rem; cursor: pointer; outline: none; transition: var(--transition);">
+                    <option value="">-- Chọn Mẫu Hợp Đồng Đối Chiếu --</option>
+                    <option value="buu_cuc">Hợp đồng thuê bưu cục (Kho bưu cục)</option>
+                    <option value="ktc">Hợp đồng thuê KTC (Bến bãi KTC)</option>
+                    <option value="tai">Hợp đồng thuê tải (Vận chuyển)</option>
+                    <option value="khach_hang">Hợp đồng khách hàng (Giao chặng cuối)</option>
+                    <option value="finetoday">Hợp đồng khách hàng B2B (Dự án Fine Today)</option>
+                    <option value="non_ecom">Hợp đồng khách hàng Non-ecom</option>
+                  </select>
+                </div>
+                <span class="badge" id="template-status-badge" style="background: rgba(255, 85, 85, 0.1); color: var(--danger); border: 1px solid rgba(255, 85, 85, 0.2);">Chưa Chọn Mẫu</span>
+              </div>
+            </div>
+
+            <div class="compare-panel-layout">
+              <!-- Sticky Sidebar Navigation -->
+              <nav class="compare-side-nav">
+                <span class="nav-title">Mục lục kết quả</span>
+                <a href="#compare-corp-section" class="nav-item active" data-target="compare-corp-section">
+                  <span class="dot"></span>
+                  1. Thông tin pháp nhân
+                </a>
+                <a href="#compare-qty-section" class="nav-item" data-target="compare-qty-section">
+                  <span class="dot"></span>
+                  2. Định lượng thay đổi
+                </a>
+                <a href="#compare-diff-section" class="nav-item" data-target="compare-diff-section">
+                  <span class="dot"></span>
+                  3. Chi tiết nội dung sửa
+                </a>
+                <a href="#compare-placeholders-section" class="nav-item" data-target="compare-placeholders-section">
+                  <span class="dot"></span>
+                  4. Thông tin bổ sung
+                </a>
+              </nav>
+
+              <div class="panel-body-scrollable" id="compare-scroll-body">
+              
+              <!-- Compare Placeholder Message -->
+              <div id="compare-placeholder" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 2rem; text-align: center; color: var(--text-secondary); background: rgba(255,255,255,0.01); border: 1px dashed var(--border-color); border-radius: 12px; margin-top: 1rem;">
+                <div style="font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.5;">📑</div>
+                <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-primary);">Chưa chọn mẫu hợp đồng đối chiếu</h4>
+                <p style="font-size: 0.82rem; max-width: 320px; line-height: 1.5; color: var(--text-muted);">Vui lòng bấm chọn loại mẫu hợp đồng phù hợp từ danh sách thả nổi phía trên để tiến hành đối soát và hiển thị so lệch.</p>
+              </div>
+
+              <!-- 1. Corp Info Section -->
+              <div class="analysis-section" id="compare-corp-section">
+                <h3>1. Đối soát Thông tin Pháp nhân</h3>
+                <div class="corp-info-table-container">
+                  <table class="corp-info-table">
+                    <thead>
+                      <tr>
+                        <th>Trường thông tin</th>
+                        <th>Theo mẫu chuẩn</th>
+                        <th>Hợp đồng đối tác gửi</th>
+                        <th>Trạng thái</th>
+                      </tr>
+                    </thead>
+                    <tbody id="corp-info-tbody">
+                      <!-- Corp info matches -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- 2. Quantity changes indicator -->
+              <div class="analysis-section" id="compare-qty-section">
+                <h3>2. Định lượng thay đổi điều khoản</h3>
+                <div class="quantity-overview">
+                  <div class="quantity-card">
+                    <span class="qty-num" id="qty-total-changes">0</span>
+                    <span class="qty-lbl">Tổng điều khoản bị thay đổi</span>
+                  </div>
+                  <div class="quantity-msg">
+                    <p>Hệ thống so sánh Word Compare đã quét và phát hiện các thay đổi so với mẫu hợp đồng chuẩn được chỉ định làm cơ sở đối chiếu.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 3. Split Screen Diff Viewer -->
+              <div class="analysis-section" id="compare-diff-section">
+                <h3>3. Chi tiết nội dung chỉnh sửa (Highlight Differences)</h3>
+                <div class="diff-list" id="diff-list-container">
+                  <!-- Split screen diff items -->
+                </div>
+              </div>
+
+              <!-- 4. Completed Placeholders List -->
+              <div class="analysis-section" id="compare-placeholders-section">
+                <h3>4. Thông tin & Bảng biểu đã bổ sung/điền thêm</h3>
+                <div class="placeholder-fills-list" id="placeholders-list-container">
+                  <!-- Dynamic list of filled placeholders -->
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        </section>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- JavaScript and Database -->
+  <script src="mock_db.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

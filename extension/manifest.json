@@ -1,0 +1,48 @@
+{
+  "manifest_version": 3,
+  "name": "GHN Legal AI Contract Screening",
+  "version": "1.0.0",
+  "description": "Tự động hóa tiếp nhận hợp đồng từ Gmail và đẩy dữ liệu sang hệ thống WebApp đối soát thông minh.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://ic.haraworks.vn/*",
+    "https://lisa.ficus.ai/*",
+    "http://localhost/*",
+    "http://127.0.0.1/*"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://ic.haraworks.vn/*",
+        "https://lisa.ficus.ai/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "file:///*",
+        "http://localhost/*",
+        "http://127.0.0.1/*"
+      ],
+      "js": [
+        "webapp_content.js"
+      ],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ]
+}
