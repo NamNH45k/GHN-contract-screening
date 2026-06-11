@@ -1296,7 +1296,23 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Listen for pushed contracts from Chrome Extension
+  // Security: Verify sender origin against trusted whitelist before processing
+  const TRUSTED_MESSAGE_ORIGINS = [
+    "https://ghn-contract-screening.vercel.app",
+    window.location.origin,
+    "null" // Chrome extensions using file:// pages send origin "null"
+  ];
+
   window.addEventListener("message", (event) => {
+    // Security check: reject messages from untrusted origins
+    const originTrusted = TRUSTED_MESSAGE_ORIGINS.includes(event.origin) ||
+                          event.origin.startsWith("http://localhost") ||
+                          event.origin.startsWith("http://127.0.0.1");
+    if (!originTrusted) {
+      console.warn("GHN WebApp: Rejected message from untrusted origin:", event.origin);
+      return;
+    }
+
     if (event.data && event.data.action === "push_contract_from_extension") {
       const newContract = event.data.payload;
       
