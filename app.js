@@ -919,8 +919,8 @@ document.addEventListener("DOMContentLoaded", () => {
           corpInfoTbody.innerHTML += `
             <tr>
               <td><strong>${info.field}</strong></td>
-              <td>${info.original}</td>
-              <td style="${isFilled ? 'color: var(--success);' : 'color: var(--danger); font-weight: 600;'}">${info.incoming}</td>
+              <td>${escapeHtml(info.original)}</td>
+              <td style="${isFilled ? 'color: var(--success);' : 'color: var(--danger); font-weight: 600;'}">${escapeHtml(info.incoming)}</td>
               <td>${statusBadge}</td>
             </tr>
           `;
@@ -1095,7 +1095,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       card.innerHTML = `
         <div class="card-header-row">
-          <span class="contract-name" title="${contract.fileName}">${contract.fileName}</span>
+          <span class="contract-name" title="${escapeHtml(contract.fileName)}">${escapeHtml(contract.fileName)}</span>
           ${groupBadge}
         </div>
         <div class="card-meta">
