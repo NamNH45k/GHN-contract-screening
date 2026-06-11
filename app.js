@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // ==========================================================================
   let activeFilter = "all";
   let activeContractId = null;
+  let currentUser = null; // Stores { email, name, role, avatar }
 
   const TEMPLATE_MAP = {
     "buu_cuc": "Hợp đồng thuê bưu cục",
@@ -13,6 +14,16 @@ document.addEventListener("DOMContentLoaded", () => {
     "finetoday": "Hợp đồng B2B",
     "non_ecom": "Hợp đồng Non-ecom"
   };
+
+  // Load user from localStorage
+  const savedUser = localStorage.getItem("GHN_USER");
+  if (savedUser) {
+    try {
+      currentUser = JSON.parse(savedUser);
+    } catch (e) {
+      console.error("Error loading user:", e);
+    }
+  }
 
   // Load contracts from localStorage if available
   let localDb = localStorage.getItem("CONTRACTS_DB");
@@ -31,6 +42,142 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const saveToLocalStorage = () => {
     localStorage.setItem("CONTRACTS_DB", JSON.stringify(CONTRACTS_DB));
+  };
+
+  // ==========================================================================
+  // AUTHENTICATION FUNCTIONS
+  // ==========================================================================
+  const updateProfileUI = () => {
+    const profileSection = document.getElementById("user-profile-section");
+    const userAvatarEl = document.getElementById("user-avatar");
+    const userDisplayNameEl = document.getElementById("user-display-name");
+    const userDisplayRoleEl = document.getElementById("user-display-role");
+
+    if (currentUser) {
+      if (profileSection) profileSection.style.display = "block";
+      if (userAvatarEl) {
+        userAvatarEl.textContent = currentUser.avatar || "?";
+        userAvatarEl.className = "user-avatar " + currentUser.role;
+      }
+      if (userDisplayNameEl) userDisplayNameEl.textContent = currentUser.name;
+      if (userDisplayRoleEl) {
+        userDisplayRoleEl.textContent = 
+          currentUser.role === "admin" ? "Admin" :
+          currentUser.role === "reviewer" ? "Reviewer" : "Business User";
+        userDisplayRoleEl.className = "role-badge " + currentUser.role;
+      }
+    } else {
+      if (profileSection) profileSection.style.display = "none";
+    }
+  };
+
+  const showLoginOverlay = () => {
+    const overlay = document.getElementById("login-overlay");
+    if (overlay) overlay.style.display = "flex";
+  };
+
+  const hideLoginOverlay = () => {
+    const overlay = document.getElementById("login-overlay");
+    if (overlay) overlay.style.display = "none";
+  };
+
+  const checkAuth = () => {
+    if (!currentUser) {
+      showLoginOverlay();
+      return false;
+    }
+    hideLoginOverlay();
+    updateProfileUI();
+    return true;
+  };
+
+  const loginUser = (userObj) => {
+    currentUser = userObj;
+    localStorage.setItem("GHN_USER", JSON.stringify(currentUser));
+    updateProfileUI();
+    hideLoginOverlay();
+    
+    // Clear selections and re-initialize
+    activeContractId = null;
+    initDashboard();
+  };
+
+  const logoutUser = () => {
+    currentUser = null;
+    localStorage.removeItem("GHN_USER");
+    window.location.reload();
+  };
+
+  const setupAuthEventListeners = () => {
+    const btnGoogleLogin = document.getElementById("btn-google-login");
+    const oauthModal = document.getElementById("oauth-modal");
+    const btnOauthCancel = document.getElementById("btn-oauth-cancel");
+    const accountItems = document.querySelectorAll(".account-item");
+    const btnCustomLoginSubmit = document.getElementById("btn-custom-login-submit");
+    const customEmailInput = document.getElementById("custom-email-input");
+    const customLoginError = document.getElementById("custom-login-error");
+    const btnLogout = document.getElementById("btn-logout");
+
+    if (btnGoogleLogin && oauthModal) {
+      btnGoogleLogin.addEventListener("click", () => {
+        oauthModal.style.display = "flex";
+      });
+    }
+
+    if (btnOauthCancel && oauthModal) {
+      btnOauthCancel.addEventListener("click", () => {
+        oauthModal.style.display = "none";
+        if (customLoginError) customLoginError.style.display = "none";
+      });
+    }
+
+    accountItems.forEach(item => {
+      item.addEventListener("click", () => {
+        const email = item.getAttribute("data-email");
+        const name = item.getAttribute("data-name");
+        const avatar = item.getAttribute("data-avatar");
+        const role = item.getAttribute("data-role");
+        
+        loginUser({ email, name, avatar, role });
+        if (oauthModal) oauthModal.style.display = "none";
+      });
+    });
+
+    if (btnCustomLoginSubmit && customEmailInput) {
+      btnCustomLoginSubmit.addEventListener("click", () => {
+        const email = customEmailInput.value.trim().toLowerCase();
+        if (customLoginError) customLoginError.style.display = "none";
+
+        if (!email.endsWith("@ghn.vn")) {
+          if (customLoginError) {
+            customLoginError.textContent = "Chỉ chấp nhận email tên miền @ghn.vn!";
+            customLoginError.style.display = "block";
+          }
+          return;
+        }
+
+        const namePart = email.split("@")[0];
+        // Capitalize first letters for name
+        const name = namePart.split(/[-_.]/).map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
+        const initials = namePart.split(/[-_.]/).map(word => word.charAt(0).toUpperCase()).join("").substring(0, 3);
+        
+        loginUser({
+          email: email,
+          name: name,
+          avatar: initials || "GHN",
+          role: "sale" // Default custom logins to Business User
+        });
+        
+        if (oauthModal) oauthModal.style.display = "none";
+        customEmailInput.value = "";
+      });
+    }
+
+    if (btnLogout) {
+      btnLogout.addEventListener("click", () => {
+        logoutUser();
+      });
+    }
   };
 
   // ==========================================================================
@@ -869,12 +1016,44 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
+  // Delete contract logic
+  const deleteContract = (id) => {
+    const index = CONTRACTS_DB.findIndex(c => c.id === id);
+    if (index !== -1) {
+      CONTRACTS_DB.splice(index, 1);
+      saveToLocalStorage();
+      
+      // If the deleted contract was the active one, show empty state
+      if (activeContractId === id) {
+        activeContractId = null;
+        showEmptyState();
+      }
+      
+      updateStats();
+      renderContractsList();
+    }
+  };
+
+  // Helper to get contracts filtered by user role permissions
+  const getRoleFilteredContracts = () => {
+    if (!currentUser) return [];
+    if (currentUser.role === "admin" || currentUser.role === "reviewer") return CONTRACTS_DB;
+    // For Business User (sale): Only show their own uploads or extension pushes
+    return CONTRACTS_DB.filter(c => 
+      c.sender === "Người dùng (Upload)" || 
+      c.sender === currentUser.email || 
+      c.sender === "Extension User" || 
+      c.id.startsWith("upload_")
+    );
+  };
+
   // Initialize and update stats counters
   const updateStats = () => {
-    totalCntEl.textContent = CONTRACTS_DB.length;
+    const contractsList = getRoleFilteredContracts();
+    totalCntEl.textContent = contractsList.length;
     
-    const countA = CONTRACTS_DB.filter(c => c.group === "a").length;
-    const countB = CONTRACTS_DB.filter(c => c.group === "b" && c.selectedTemplate !== null).length;
+    const countA = contractsList.filter(c => c.group === "a").length;
+    const countB = contractsList.filter(c => c.group === "b" && c.selectedTemplate !== null).length;
     
     aCntEl.textContent = countA;
     bCntEl.textContent = countB;
@@ -883,8 +1062,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // Render Left Panel Contracts List
   const renderContractsList = () => {
     contractsListContainer.innerHTML = "";
+    const contractsList = getRoleFilteredContracts();
 
-    const filtered = CONTRACTS_DB.filter(c => {
+    const filtered = contractsList.filter(c => {
       if (activeFilter === "group_a") return c.group === "a";
       if (activeFilter === "group_b") return c.group === "b";
       return true; // "all"
@@ -908,6 +1088,11 @@ document.addEventListener("DOMContentLoaded", () => {
         ? `<span class="badge badge-danger">Legal Review</span>` 
         : `<span class="badge badge-success">Đối soát</span>`;
 
+      // Render delete button only for admin
+      const deleteBtn = (currentUser && currentUser.role === "admin")
+        ? `<button class="btn-delete-contract" data-delete-id="${contract.id}" title="Xóa hợp đồng này">🗑 Xóa</button>`
+        : ``;
+
       card.innerHTML = `
         <div class="card-header-row">
           <span class="contract-name" title="${contract.fileName}">${contract.fileName}</span>
@@ -915,12 +1100,23 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
         <div class="card-meta">
           <span>${contract.fileSize}</span>
+          ${deleteBtn}
         </div>
       `;
 
       card.addEventListener("click", () => {
         selectContract(contract.id);
       });
+
+      const delBtnEl = card.querySelector(".btn-delete-contract");
+      if (delBtnEl) {
+        delBtnEl.addEventListener("click", (e) => {
+          e.stopPropagation(); // Prevent card selection
+          if (confirm(`Bạn có chắc chắn muốn xóa hợp đồng "${contract.fileName}" khỏi hệ thống?`)) {
+            deleteContract(contract.id);
+          }
+        });
+      }
 
       contractsListContainer.appendChild(card);
     });
@@ -1043,6 +1239,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Main Dashboard Setup
   const initDashboard = () => {
+    if (!checkAuth()) return;
+
     updateStats();
     renderContractsList();
     if (activeContractId) {
@@ -1109,7 +1307,7 @@ document.addEventListener("DOMContentLoaded", () => {
           id: newContract.id || "contract_" + Date.now() + "_" + Math.floor(Math.random() * 1000),
           fileName: newContract.fileName,
           receivedDate: newContract.receivedDate || new Date().toLocaleDateString("vi-VN"),
-          sender: newContract.sender || "Extension User",
+          sender: currentUser ? currentUser.email : (newContract.sender || "Extension User"),
           fileSize: newContract.fileSize || "1.5 MB",
           group: "b", // default to group b
           status: "Chờ đối soát",
@@ -1218,7 +1416,7 @@ document.addEventListener("DOMContentLoaded", () => {
               id: newId,
               fileName: file.name,
               receivedDate: new Date().toLocaleDateString("vi-VN") + " (Tải lên)",
-              sender: "Người dùng (Upload)",
+              sender: currentUser ? currentUser.email : "Người dùng (Upload)",
               fileSize: (file.size / (1024 * 1024)).toFixed(2) + " MB",
               group: "b",
               status: "Chờ đối soát",
@@ -1251,6 +1449,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Start
+  setupAuthEventListeners();
   setupCompareSideNav();
   initDashboard();
 });

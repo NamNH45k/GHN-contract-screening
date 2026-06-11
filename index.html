@@ -20,6 +20,20 @@
 
 
       <div class="sidebar-footer">
+        <!-- Logged in User Profile Section -->
+        <div id="user-profile-section" class="user-profile-section" style="display: none;">
+          <div class="user-info-row">
+            <div id="user-avatar" class="user-avatar">?</div>
+            <div class="user-details">
+              <span id="user-display-name" class="user-name">Chưa đăng nhập</span>
+              <span id="user-display-role" class="role-badge">Chưa xác định</span>
+            </div>
+            <button id="btn-logout" class="btn-logout" title="Đăng xuất">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M5 22C4.44772 22 4 21.5523 4 21V3C4 2.44772 4.44772 2 5 2H19C19.5523 2 20 2.44772 20 3V6H18V4H6V20H18V18H20V21C20 21.5523 19.5523 22 19 22H5ZM16 16V13H11V11H16V8L21 12L16 16Z"></path></svg>
+            </button>
+          </div>
+        </div>
+
         <p>Phân hệ Legal AI Engine</p>
         <p>Phiên bản WebApp 1.0</p>
       </div>
@@ -227,6 +241,79 @@
       </div>
     </main>
 
+  </div>
+
+  <!-- Login Overlay -->
+  <div id="login-overlay" class="login-overlay" style="display: none;">
+    <div class="login-card">
+      <div class="login-logo-container">
+        <img src="https://cdn.hstatic.net/themes/200000472237/1001423864/14/logo.png?v=2850" alt="Giao Hàng Nhanh" class="login-logo">
+      </div>
+      <h2>Phân hệ Legal AI Engine</h2>
+      <p class="login-subtitle">Hệ thống quản lý đối soát và rà soát hợp đồng thông minh dành riêng cho nhân sự Giao Hàng Nhanh (GHN).</p>
+      
+      <button id="btn-google-login" class="btn-google-login">
+        <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" alt="Google Logo" class="g-icon">
+        <span>Đăng nhập bằng Google Workspace</span>
+      </button>
+      
+      <div class="login-footer">
+        <p>© 2026 Giao Hàng Nhanh JSC. Bảo mật nội bộ.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Simulated Google OAuth Account Chooser Modal -->
+  <div id="oauth-modal" class="oauth-modal" style="display: none;">
+    <div class="oauth-card">
+      <div class="oauth-header">
+        <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" alt="Google Logo" style="height: 24px;">
+        <h3>Đăng nhập bằng tài khoản Google</h3>
+        <p>để tiếp tục đến ghn.vn</p>
+      </div>
+      
+      <div class="oauth-body">
+        <div class="account-list">
+          <div class="account-item" data-email="admin@ghn.vn" data-name="Nguyễn Hữu Nam" data-avatar="NHN" data-role="admin">
+            <div class="account-avatar admin">NHN</div>
+            <div class="account-details">
+              <span class="account-name">Nguyễn Hữu Nam <span class="badge-role admin">Admin</span></span>
+              <span class="account-email">admin@ghn.vn</span>
+            </div>
+          </div>
+          
+          <div class="account-item" data-email="reviewer@ghn.vn" data-name="Trần Thị Mai" data-avatar="TTM" data-role="reviewer">
+            <div class="account-avatar reviewer">TTM</div>
+            <div class="account-details">
+              <span class="account-name">Trần Thị Mai <span class="badge-role reviewer">Reviewer</span></span>
+              <span class="account-email">reviewer@ghn.vn</span>
+            </div>
+          </div>
+          
+          <div class="account-item" data-email="sale@ghn.vn" data-name="Lê Văn An" data-avatar="LVA" data-role="sale">
+            <div class="account-avatar sale">LVA</div>
+            <div class="account-details">
+              <span class="account-name">Lê Văn An <span class="badge-role sale">Business User</span></span>
+              <span class="account-email">sale@ghn.vn</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="oauth-divider">Hoặc</div>
+        
+        <div class="custom-login-form">
+          <div style="display: flex; gap: 8px;">
+            <input type="email" id="custom-email-input" placeholder="nhanvien@ghn.vn" style="flex-grow: 1; padding: 10px; border: 1px solid #e5e7eb; border-radius: 6px; font-family: inherit; font-size: 0.85rem; outline: none;">
+            <button id="btn-custom-login-submit" style="background: #ff6c0a; color: #fff; border: none; padding: 10px 16px; border-radius: 6px; font-family: inherit; font-size: 0.85rem; font-weight: 700; cursor: pointer;">Đăng nhập</button>
+          </div>
+          <p id="custom-login-error" class="error-msg" style="color: var(--danger); font-size: 0.72rem; margin-top: 6px; display: none; text-align: left; font-weight: 600;">Chỉ chấp nhận email tên miền @ghn.vn!</p>
+        </div>
+      </div>
+      
+      <div class="oauth-footer">
+        <button id="btn-oauth-cancel" class="btn-cancel">Hủy bỏ</button>
+      </div>
+    </div>
   </div>
 
   <!-- JavaScript and Database -->

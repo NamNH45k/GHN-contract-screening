@@ -983,3 +983,435 @@ header {
 .compare-side-nav .nav-item.active .dot {
   background: var(--accent);
 }
+
+/* ==========================================================================
+   AUTHENTICATION & LOGIN PORTAL (PREMIUM GLASSMORPHISM)
+   ========================================================================== */
+.login-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(circle at 50% 50%, rgba(30, 32, 50, 0.85), #0b0c15 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.login-card {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+  border-radius: 24px;
+  width: 440px;
+  padding: 3rem 2.5rem;
+  text-align: center;
+  color: #1f2937;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  transform: translateY(0);
+  animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.login-logo-container {
+  background: #ffffff;
+  padding: 10px 24px;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(255, 108, 10, 0.15);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.login-logo {
+  height: 42px;
+  width: auto;
+  object-fit: contain;
+}
+
+.login-card h2 {
+  font-size: 1.4rem;
+  font-weight: 850;
+  color: #ff6c0a;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.login-subtitle {
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: #4b5563;
+  margin: 0 0 0.5rem 0;
+}
+
+.btn-google-login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 0.88rem 1.5rem;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  color: #374151;
+  font-family: var(--font-main);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-google-login:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+.btn-google-login:active {
+  transform: translateY(1px);
+}
+
+.btn-google-login .g-icon {
+  height: 20px;
+  width: 20px;
+}
+
+.login-footer {
+  font-size: 0.72rem;
+  color: #9ca3af;
+  margin-top: 1rem;
+}
+
+/* Simulated OAuth Dialog Modal */
+.oauth-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.oauth-card {
+  background: #ffffff;
+  border-radius: 16px;
+  width: 420px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+  padding: 2.25rem 2rem 1.5rem 2rem;
+  text-align: center;
+  font-family: Roboto, Arial, sans-serif;
+  animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.oauth-header {
+  margin-bottom: 1.5rem;
+}
+
+.oauth-header h3 {
+  font-family: inherit;
+  font-size: 1.35rem;
+  font-weight: 500;
+  color: #202124;
+  margin-top: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.oauth-header p {
+  font-size: 0.88rem;
+  color: #5f6368;
+  margin: 0;
+}
+
+.oauth-body {
+  margin-bottom: 1.5rem;
+}
+
+.account-list {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.account-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #dadce0;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-align: left;
+}
+
+.account-item:last-child {
+  border-bottom: none;
+}
+
+.account-item:hover {
+  background: #f8f9fa;
+}
+
+.account-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.78rem;
+}
+
+.account-avatar.admin { background-color: #ea4335; }
+.account-avatar.reviewer { background-color: #4285f4; }
+.account-avatar.sale { background-color: #34a853; }
+
+.account-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.account-name {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #3c4043;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.account-email {
+  font-size: 0.78rem;
+  color: #5f6368;
+}
+
+.badge-role {
+  font-size: 0.62rem;
+  padding: 1px 6px;
+  border-radius: 9999px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.badge-role.admin {
+  background: rgba(234, 67, 53, 0.1);
+  color: #ea4335;
+  border: 1px solid rgba(234, 67, 53, 0.2);
+}
+
+.badge-role.reviewer {
+  background: rgba(66, 133, 244, 0.1);
+  color: #4285f4;
+  border: 1px solid rgba(66, 133, 244, 0.2);
+}
+
+.badge-role.sale {
+  background: rgba(52, 168, 83, 0.1);
+  color: #34a853;
+  border: 1px solid rgba(52, 168, 83, 0.2);
+}
+
+.oauth-divider {
+  font-size: 0.75rem;
+  color: #5f6368;
+  display: flex;
+  align-items: center;
+  margin: 1rem 0;
+}
+
+.oauth-divider::before, .oauth-divider::after {
+  content: "";
+  flex-grow: 1;
+  height: 1px;
+  background: #dadce0;
+}
+
+.oauth-divider::before { margin-right: 12px; }
+.oauth-divider::after { margin-left: 12px; }
+
+.oauth-footer {
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid #f1f3f4;
+  padding-top: 1rem;
+}
+
+.btn-cancel {
+  background: none;
+  border: none;
+  color: #1a73e8;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 4px;
+}
+
+.btn-cancel:hover {
+  background: rgba(26, 115, 232, 0.04);
+}
+
+/* User Profile Section in Sidebar */
+.user-profile-section {
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+.user-info-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 5px rgba(255, 108, 10, 0.25);
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex-grow: 1;
+}
+
+.user-name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-details .role-badge {
+  font-size: 0.6rem;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 9999px;
+  display: inline-block;
+  align-self: flex-start;
+  margin-top: 2px;
+  text-transform: uppercase;
+}
+
+.user-details .role-badge.admin {
+  background: rgba(220, 38, 38, 0.08);
+  color: var(--danger);
+  border: 1px solid rgba(220, 38, 38, 0.15);
+}
+
+.user-details .role-badge.reviewer {
+  background: rgba(0, 110, 174, 0.08);
+  color: var(--accent-blue);
+  border: 1px solid rgba(0, 110, 174, 0.15);
+}
+
+.user-details .role-badge.sale {
+  background: rgba(22, 163, 74, 0.08);
+  color: var(--success);
+  border: 1px solid rgba(22, 163, 74, 0.15);
+}
+
+.btn-logout {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+
+.btn-logout:hover {
+  background: rgba(220, 38, 38, 0.06);
+  color: var(--danger);
+}
+
+/* Trash delete button on contract cards */
+.btn-delete-contract {
+  position: absolute;
+  right: 10px;
+  bottom: 8px;
+  background: rgba(220, 38, 38, 0.05);
+  border: 1px solid rgba(220, 38, 38, 0.1);
+  color: var(--danger);
+  border-radius: 6px;
+  padding: 4px 6px;
+  font-size: 0.72rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: var(--transition);
+  z-index: 10;
+}
+
+.contract-card:hover .btn-delete-contract {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.btn-delete-contract:hover {
+  background: var(--danger);
+  color: #fff;
+  border-color: var(--danger);
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.2);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.92); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
