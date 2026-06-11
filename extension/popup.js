@@ -87,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
         
         // Notify parent simulator window if running inside iframe
         if (window.parent) {
-          window.parent.postMessage({ action: "simulator_scan_url", url: url }, "*");
+          window.parent.postMessage({ action: "simulator_scan_url", url: url }, window.location.origin);
         } else {
           alert(`Giả lập gửi link đối soát: ${url}`);
         }

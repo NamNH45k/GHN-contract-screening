@@ -15,13 +15,42 @@ document.addEventListener("DOMContentLoaded", () => {
     "non_ecom": "Hợp đồng Non-ecom"
   };
 
-  // Load user from localStorage
+  // SEC-003: Hard whitelist of valid template IDs (used for script loading)
+  const VALID_TEMPLATE_IDS = Object.keys(TEMPLATE_MAP);
+
+  // SEC-001: Valid role whitelist
+  const VALID_ROLES = ["admin", "reviewer", "sale"];
+
+  // SEC-011: Session expiry duration (8 hours in milliseconds)
+  const SESSION_MAX_AGE_MS = 8 * 60 * 60 * 1000;
+
+  // SEC-012: Login rate limiting state
+  let loginAttemptCount = 0;
+  let loginLockoutUntil = 0;
+
+  // Load user from localStorage with validation (SEC-001 + SEC-011)
   const savedUser = localStorage.getItem("GHN_USER");
   if (savedUser) {
     try {
-      currentUser = JSON.parse(savedUser);
+      const parsed = JSON.parse(savedUser);
+      // Validate required fields and role whitelist
+      if (parsed && typeof parsed.email === "string" &&
+          parsed.email.endsWith("@ghn.vn") &&
+          VALID_ROLES.includes(parsed.role)) {
+        // Check session expiry
+        if (parsed.loginTime && (Date.now() - parsed.loginTime) < SESSION_MAX_AGE_MS) {
+          currentUser = parsed;
+        } else {
+          console.warn("Session expired. Please log in again.");
+          localStorage.removeItem("GHN_USER");
+        }
+      } else {
+        console.warn("Invalid session data detected, clearing.");
+        localStorage.removeItem("GHN_USER");
+      }
     } catch (e) {
       console.error("Error loading user:", e);
+      localStorage.removeItem("GHN_USER");
     }
   }
 
@@ -40,8 +69,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // SEC-006: Strip sensitive inMemoryText before persisting to localStorage
   const saveToLocalStorage = () => {
-    localStorage.setItem("CONTRACTS_DB", JSON.stringify(CONTRACTS_DB));
+    const safeContracts = CONTRACTS_DB.map(c => {
+      const { inMemoryText, ...rest } = c;
+      return rest;
+    });
+    localStorage.setItem("CONTRACTS_DB", JSON.stringify(safeContracts));
   };
 
   // ==========================================================================
@@ -92,6 +126,11 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const loginUser = (userObj) => {
+    // SEC-001: Enforce role whitelist and add login timestamp for session expiry
+    if (!VALID_ROLES.includes(userObj.role)) {
+      userObj.role = "sale"; // Default to least privilege
+    }
+    userObj.loginTime = Date.now();
     currentUser = userObj;
     localStorage.setItem("GHN_USER", JSON.stringify(currentUser));
     updateProfileUI();
@@ -145,16 +184,34 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (btnCustomLoginSubmit && customEmailInput) {
       btnCustomLoginSubmit.addEventListener("click", () => {
+        // SEC-012: Rate limiting — block after 5 failed attempts for 60 seconds
+        if (Date.now() < loginLockoutUntil) {
+          const remainSec = Math.ceil((loginLockoutUntil - Date.now()) / 1000);
+          if (customLoginError) {
+            customLoginError.textContent = `Quá nhiều lần thử. Vui lòng đợi ${remainSec} giây.`;
+            customLoginError.style.display = "block";
+          }
+          return;
+        }
+
         const email = customEmailInput.value.trim().toLowerCase();
         if (customLoginError) customLoginError.style.display = "none";
 
         if (!email.endsWith("@ghn.vn")) {
+          loginAttemptCount++;
+          if (loginAttemptCount >= 5) {
+            loginLockoutUntil = Date.now() + 60000; // Lock 60 seconds
+            loginAttemptCount = 0;
+          }
           if (customLoginError) {
             customLoginError.textContent = "Chỉ chấp nhận email tên miền @ghn.vn!";
             customLoginError.style.display = "block";
           }
           return;
         }
+
+        // Reset attempt counter on valid domain
+        loginAttemptCount = 0;
 
         const namePart = email.split("@")[0];
         // Capitalize first letters for name
@@ -873,6 +930,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const performVerbatimCompare = async (contract, statusBadge) => {
     try {
       const templateId = contract.selectedTemplate;
+
+      // SEC-003: Validate templateId against hard whitelist before loading any scripts
+      if (!VALID_TEMPLATE_IDS.includes(templateId)) {
+        throw new Error(`Loại mẫu hợp đồng không hợp lệ: "${escapeHtml(String(templateId))}". Vui lòng chọn mẫu từ danh sách.`);
+      }
       
       let contractText = "";
       if (contract.inMemoryText) {
@@ -881,6 +943,11 @@ document.addEventListener("DOMContentLoaded", () => {
         await loadLocalScript(`./temp/${templateId}.js`);
       } else {
         const baseName = contract.fileName.substring(0, contract.fileName.lastIndexOf('.')) || contract.fileName;
+
+        // SEC-003: Sanitize baseName — reject path traversal characters
+        if (/[\.]{2}|[/\\]/.test(baseName)) {
+          throw new Error("Tên tệp tin không hợp lệ (chứa ký tự path traversal).");
+        }
         const contractJsPath = `./temp/${baseName}.js`;
 
         await Promise.all([
@@ -1017,7 +1084,12 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // Delete contract logic
+  // SEC-002: Enforce admin role check before allowing contract deletion
   const deleteContract = (id) => {
+    if (!currentUser || currentUser.role !== "admin") {
+      console.warn("Security: Unauthorized delete attempt blocked. Admin role required.");
+      return;
+    }
     const index = CONTRACTS_DB.findIndex(c => c.id === id);
     if (index !== -1) {
       CONTRACTS_DB.splice(index, 1);
@@ -1276,7 +1348,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const contract = CONTRACTS_DB.find(c => c.id === activeContractId);
       if (!contract || contract.group !== "b") return;
 
-      if (selectedValue) {
+      // SEC-003: Validate selected template value against whitelist
+      if (selectedValue && VALID_TEMPLATE_IDS.includes(selectedValue)) {
         contract.selectedTemplate = selectedValue;
         contract.status = "Đã đối soát";
         contract.templateName = TEMPLATE_MAP[selectedValue] || "Hợp đồng mẫu";
@@ -1409,6 +1482,14 @@ document.addEventListener("DOMContentLoaded", () => {
     docxUploadInput.addEventListener("change", (e) => {
       const file = e.target.files[0];
       if (!file) return;
+
+      // SEC-007: Validate MIME type — only allow actual DOCX files
+      const VALID_DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+      if (file.type && file.type !== VALID_DOCX_MIME) {
+        alert("Chỉ chấp nhận file Word (.docx) hợp lệ. Tệp tin đã chọn có kiểu MIME không đúng: " + file.type);
+        docxUploadInput.value = "";
+        return;
+      }
 
       // Check if mammoth library is loaded
       if (typeof mammoth === "undefined") {

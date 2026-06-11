@@ -128,7 +128,9 @@ function injectPushButtons() {
     const button = document.createElement("button");
     button.className = "antigravity-push-btn";
     button.innerHTML = "🚚 Đẩy sang WebApp";
-    button.title = `Rà soát tài liệu: ${match.fileName}`;
+    // SEC-009: Sanitize DOM-sourced text before using in attributes
+    const safeFileName = match.fileName.replace(/[<>"'&\x00-\x1f]/g, "").substring(0, 100);
+    button.title = `Rà soát tài liệu: ${safeFileName}`;
 
     button.addEventListener("click", (e) => {
       e.preventDefault();

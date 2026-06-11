@@ -82,26 +82,38 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           });
         });
 
-        // Mock pushing to WebApp API
-        fetch("http://localhost:3000/api/contracts/receive", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(contractData)
-        })
-        .then(response => response.json())
-        .then(data => {
-          chrome.storage.local.set({ webAppConnected: true }, () => {
-            sendResponse({ success: true, serverResponse: data });
-          });
-        })
-        .catch(error => {
-          console.log("WebApp local server offline. Pushing locally in browser storage.");
+        // Push to WebApp API (dev only — localhost HTTP allowed; production must be HTTPS)
+        const API_ENDPOINT = "http://localhost:3000/api/contracts/receive";
+        const endpointUrl = new URL(API_ENDPOINT);
+        const isLocalDev = endpointUrl.hostname === "localhost" || endpointUrl.hostname === "127.0.0.1";
+        const isSecure = endpointUrl.protocol === "https:";
+
+        if (!isLocalDev && !isSecure) {
+          console.error("Security: Refusing to send contract data over insecure HTTP to non-localhost endpoint:", API_ENDPOINT);
           chrome.storage.local.set({ webAppConnected: false }, () => {
-            sendResponse({ success: true, localSimulation: true });
+            sendResponse({ success: false, reason: "Insecure endpoint rejected" });
           });
-        });
+        } else {
+          fetch(API_ENDPOINT, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(contractData)
+          })
+          .then(response => response.json())
+          .then(data => {
+            chrome.storage.local.set({ webAppConnected: true }, () => {
+              sendResponse({ success: true, serverResponse: data });
+            });
+          })
+          .catch(error => {
+            console.log("WebApp local server offline. Pushing locally in browser storage.");
+            chrome.storage.local.set({ webAppConnected: false }, () => {
+              sendResponse({ success: true, localSimulation: true });
+            });
+          });
+        }
       });
     });
     return true;

@@ -4,7 +4,7 @@ const CONTRACTS_DB = [
     "id": "contract_chot_ngay_1_6",
     "fileName": "978b50fb-7c27-466a-9f0f-33c81b66017f_H_chot_ngay_1.6 (1).docx",
     "receivedDate": "02/06/2026",
-    "sender": "partner@chotngay.vn",
+    "sender": "partner-a@example.vn",
     "fileSize": "84 KB",
     "group": "b",
     "status": "Chờ đối soát",
@@ -15,7 +15,7 @@ const CONTRACTS_DB = [
     "id": "contract_gbn_elect",
     "fileName": "[GHN - TB ĐIỆN GBN] HDDV .docx",
     "receivedDate": "28/05/2026",
-    "sender": "partner@gbn.vn",
+    "sender": "partner-b@example.vn",
     "fileSize": "2.4 MB",
     "group": "b",
     "status": "Chờ đối soát",
@@ -26,7 +26,7 @@ const CONTRACTS_DB = [
     "id": "contract_user_socson",
     "fileName": "H_uong_Bang_Xuan_Bach_Xa_Quang_Tien_Huyen_Soc_Son.docx",
     "receivedDate": "25/05/2026",
-    "sender": "ke-toan@ficus.ai",
+    "sender": "accounting@example.vn",
     "fileSize": "1.6 MB",
     "group": "b", // Đối chiếu theo mẫu
     "status": "Chờ đối soát",
@@ -37,7 +37,7 @@ const CONTRACTS_DB = [
     "id": "contract_finetoday",
     "fileName": "CM_15_01_Doanh_nghiep_Hop_dong_dich_vu_B2B_( Fine Today project)_AR_reviewed.docx",
     "receivedDate": "25/05/2026",
-    "sender": "ke-toan@ficus.ai",
+    "sender": "accounting@example.vn",
     "fileSize": "6.1 MB",
     "group": "b",
     "status": "Chờ đối soát",
@@ -48,7 +48,7 @@ const CONTRACTS_DB = [
     "id": "contract_1",
     "fileName": "HD_CungCap_DichVu_FPT_Signed.pdf",
     "receivedDate": "25/05/2026",
-    "sender": "business@fpt.com.vn",
+    "sender": "business@example.vn",
     "fileSize": "1.4 MB",
     "group": "b",
     "status": "Chờ đối soát",
@@ -59,7 +59,7 @@ const CONTRACTS_DB = [
     "id": "contract_2",
     "fileName": "HD_Thue_Van_Phong_Partner_Format.docx",
     "receivedDate": "24/05/2026",
-    "sender": "leasing@saigoncentre.com",
+    "sender": "leasing@example.com",
     "fileSize": "2.1 MB",
     "group": "a", // Cần Legal Review
     "status": "Cần rà soát",
@@ -67,7 +67,7 @@ const CONTRACTS_DB = [
     "notifications": [
       {
         "channel": "Email hệ thống",
-        "recipient": "legal-team@ghn.vn",
+        "recipient": "legal-team@example.vn",
         "status": "Đã gửi lúc 14:02 - 24/05"
       },
       {
