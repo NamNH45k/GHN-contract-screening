@@ -98,18 +98,13 @@ const initializeApp = () => {
   const checkAuth = () => {
     onAuthStateChanged(auth, async (user) => {
       if (user) {
-        if (!user.email.endsWith("@ghn.vn")) {
-          alert("Chỉ chấp nhận email tên miền @ghn.vn!");
-          signOut(auth);
-          return;
-        }
-
         try {
           const userDocRef = doc(db, "users", user.email);
           const userDocSnap = await getDoc(userDocRef);
 
           if (!userDocSnap.exists()) {
-            if (user.email === "namnh@ghn.vn") {
+            const initialSuperAdmins = ["namnh@ghn.vn", "nguyenhoangnam.law@gmail.com", "2567040145@hcmussh.edu.vn"];
+            if (initialSuperAdmins.includes(user.email)) {
               await setDoc(userDocRef, {
                 email: user.email,
                 role: "super_admin",
@@ -117,7 +112,7 @@ const initializeApp = () => {
               });
               currentUser = { email: user.email, role: "super_admin", avatar: user.email.substring(0, 2).toUpperCase() };
             } else {
-              alert("Tài khoản chưa được mời vào hệ thống!");
+              alert("Tài khoản chưa được cấp quyền truy cập vào hệ thống! Vui lòng liên hệ Quản trị viên.");
               signOut(auth);
               return;
             }

@@ -4,8 +4,8 @@ const initializeUsersApp = () => {
   let loggedInUser = null;
   
   onAuthStateChanged(auth, async (user) => {
-    if (!user || !user.email.endsWith("@ghn.vn")) {
-      alert("Bạn không có quyền truy cập trang này.");
+    if (!user) {
+      alert("Vui lòng đăng nhập!");
       window.location.href = "index.html";
       return;
     }
@@ -153,11 +153,11 @@ const initializeUsersApp = () => {
   if (btnInviteSubmit) {
     btnInviteSubmit.addEventListener("click", async () => {
       inviteError.style.display = "none";
-      const email = inviteEmailInput.value.trim().toLowerCase();
-      const role = inviteRoleSelect.value;
+      const email = document.getElementById("invite-email").value.trim().toLowerCase();
+      const role = document.getElementById("invite-role").value;
 
-      if (!email || !email.endsWith("@ghn.vn")) {
-        inviteError.textContent = "Email không hợp lệ. Phải có đuôi @ghn.vn";
+      if (!email) {
+        inviteError.textContent = "Email không được để trống";
         inviteError.style.display = "block";
         return;
       }
