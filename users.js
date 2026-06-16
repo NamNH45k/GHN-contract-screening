@@ -200,8 +200,5 @@ const initializeUsersApp = () => {
 
 };
 
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initializeUsersApp);
-} else {
-  initializeUsersApp();
-}
+// ES modules are deferred by default
+initializeUsersApp();

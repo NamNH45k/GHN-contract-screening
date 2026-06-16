@@ -1490,8 +1490,5 @@ const initializeApp = () => {
   checkAuth(); // This will trigger initDashboard when auth state is resolved
 };
 
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initializeApp);
-} else {
-  initializeApp();
-}
+// ES modules are deferred by default, meaning the DOM is already parsed when this runs.
+initializeApp();
