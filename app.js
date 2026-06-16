@@ -103,7 +103,7 @@ const initializeApp = () => {
           const userDocSnap = await getDoc(userDocRef);
 
           if (!userDocSnap.exists()) {
-            const initialSuperAdmins = ["namnh@ghn.vn", "nguyenhoangnam.law@gmail.com", "2567040145@hcmussh.edu.vn"];
+            const initialSuperAdmins = ["nguyenhoangnam.law@gmail.com"];
             if (initialSuperAdmins.includes(user.email)) {
               await setDoc(userDocRef, {
                 email: user.email,
