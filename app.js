@@ -57,15 +57,12 @@ const initializeApp = () => {
   }
 
   // Load contracts from localStorage if available
+  let CONTRACTS_DB = [];
   let localDb = localStorage.getItem("CONTRACTS_DB");
   if (localDb) {
     try {
       const parsed = JSON.parse(localDb);
-      parsed.forEach(c => {
-        if (!CONTRACTS_DB.some(orig => orig.id === c.id || orig.fileName === c.fileName)) {
-          CONTRACTS_DB.unshift(c);
-        }
-      });
+      CONTRACTS_DB = parsed;
     } catch (e) {
       console.error("Error loading CONTRACTS_DB from localStorage:", e);
     }
