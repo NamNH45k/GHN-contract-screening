@@ -115,14 +115,27 @@ const initializeUsersApp = () => {
         btn.addEventListener("click", async (e) => {
           const emailToDelete = e.target.getAttribute("data-email");
           if (confirm("Bạn có chắc chắn muốn xóa người dùng này?")) {
-            await deleteDoc(doc(db, "users", emailToDelete));
-            renderUsers();
+            try {
+              await deleteDoc(doc(db, "users", emailToDelete));
+              renderUsers();
+            } catch (error) {
+              console.error(error);
+              if (error.code === "permission-denied") {
+                alert("Lỗi: Bạn không có quyền xóa người dùng này.");
+              } else {
+                alert("Có lỗi xảy ra khi xóa người dùng.");
+              }
+            }
           }
         });
       });
     } catch (err) {
       console.error(err);
-      tableBody.innerHTML = "<tr><td colspan='3'>Lỗi tải danh sách người dùng.</td></tr>";
+      if (err.code === "permission-denied") {
+        tableBody.innerHTML = "<tr><td colspan='3' style='color:var(--danger);'>Bạn không có quyền tải danh sách người dùng.</td></tr>";
+      } else {
+        tableBody.innerHTML = "<tr><td colspan='3'>Lỗi tải danh sách người dùng.</td></tr>";
+      }
     }
   };
 
@@ -181,14 +194,24 @@ const initializeUsersApp = () => {
         }
 
         const initials = email.substring(0, 2).toUpperCase();
-        await setDoc(userRef, {
-          email: email,
-          avatar: initials,
-          role: role
-        });
-        
-        inviteModal.style.display = "none";
-        renderUsers();
+        try {
+          await setDoc(userRef, {
+            email: email,
+            avatar: initials,
+            role: role
+          });
+          inviteModal.style.display = "none";
+          renderUsers();
+        } catch (error) {
+          console.error(error);
+          if (error.code === "permission-denied") {
+            inviteError.textContent = "Lỗi: Bạn không có quyền mời người dùng hoặc gán quyền này.";
+            inviteError.style.display = "block";
+          } else {
+            inviteError.textContent = "Có lỗi xảy ra khi mời người dùng.";
+            inviteError.style.display = "block";
+          }
+        }
       } catch (e) {
         console.error(e);
         inviteError.textContent = "Lỗi khi mời người dùng.";
