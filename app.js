@@ -1,6 +1,6 @@
 import { auth, provider, signInWithPopup, onAuthStateChanged, signOut, db, collection, doc, getDoc, setDoc } from "./firebase_setup.js";
 
-document.addEventListener("DOMContentLoaded", () => {
+const initializeApp = () => {
   // ==========================================================================
   // STATE MANAGEMENT
   // ==========================================================================
@@ -184,40 +184,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const setupAuthEventListeners = () => {
     const btnGoogleLogin = document.getElementById("btn-google-login");
-    const oauthModal = document.getElementById("oauth-modal");
-    const btnOauthCancel = document.getElementById("btn-oauth-cancel");
-    const accountItems = document.querySelectorAll(".account-item");
-    const btnCustomLoginSubmit = document.getElementById("btn-custom-login-submit");
-    const customEmailInput = document.getElementById("custom-email-input");
-    const customLoginError = document.getElementById("custom-login-error");
     const btnLogout = document.getElementById("btn-logout");
 
-    if (btnGoogleLogin && oauthModal) {
+    if (btnGoogleLogin) {
       btnGoogleLogin.addEventListener("click", () => {
-        oauthModal.style.display = "flex";
-      });
-    }
-
-    if (btnOauthCancel && oauthModal) {
-      btnOauthCancel.addEventListener("click", () => {
-        oauthModal.style.display = "none";
-        if (customLoginError) customLoginError.style.display = "none";
-      });
-    }
-
-
-
-    const btnFirebaseGoogleLogin = document.getElementById("btn-firebase-google-login");
-
-    if (btnFirebaseGoogleLogin) {
-      btnFirebaseGoogleLogin.addEventListener("click", () => {
-        if (customLoginError) customLoginError.style.display = "none";
         signInWithPopup(auth, provider).catch((error) => {
           console.error("Lỗi đăng nhập Google:", error);
-          if (customLoginError) {
-            customLoginError.textContent = "Lỗi đăng nhập: " + error.message;
-            customLoginError.style.display = "block";
-          }
+          alert("Lỗi đăng nhập: " + error.message);
         });
       });
     }
@@ -1540,4 +1513,10 @@ document.addEventListener("DOMContentLoaded", () => {
   setupAuthEventListeners();
   setupCompareSideNav();
   checkAuth(); // This will trigger initDashboard when auth state is resolved
-});
+};
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initializeApp);
+} else {
+  initializeApp();
+}

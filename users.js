@@ -1,6 +1,6 @@
 import { auth, onAuthStateChanged, db, collection, getDocs, setDoc, deleteDoc, doc } from "./firebase_setup.js";
 
-document.addEventListener("DOMContentLoaded", () => {
+const initializeUsersApp = () => {
   let loggedInUser = null;
   
   onAuthStateChanged(auth, async (user) => {
@@ -198,4 +198,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-});
+};
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initializeUsersApp);
+} else {
+  initializeUsersApp();
+}
