@@ -27,34 +27,9 @@ const initializeApp = () => {
   const SESSION_MAX_AGE_MS = 8 * 60 * 60 * 1000;
 
   // SEC-012: Login rate limiting state
+
   let loginAttemptCount = 0;
   let loginLockoutUntil = 0;
-
-  // Load user from localStorage with validation (SEC-001 + SEC-011)
-  const savedUser = localStorage.getItem("GHN_USER");
-  if (savedUser) {
-    try {
-      const parsed = JSON.parse(savedUser);
-      // Validate required fields and role whitelist
-      if (parsed && typeof parsed.email === "string" &&
-          parsed.email.endsWith("@ghn.vn") &&
-          VALID_ROLES.includes(parsed.role)) {
-        // Check session expiry
-        if (parsed.loginTime && (Date.now() - parsed.loginTime) < SESSION_MAX_AGE_MS) {
-          currentUser = parsed;
-        } else {
-          console.warn("Session expired. Please log in again.");
-          localStorage.removeItem("GHN_USER");
-        }
-      } else {
-        console.warn("Invalid session data detected, clearing.");
-        localStorage.removeItem("GHN_USER");
-      }
-    } catch (e) {
-      console.error("Error loading user:", e);
-      localStorage.removeItem("GHN_USER");
-    }
-  }
 
   // Load contracts from localStorage if available
   let CONTRACTS_DB = [];
@@ -1509,6 +1484,9 @@ const initializeApp = () => {
   // Start
   setupAuthEventListeners();
   setupCompareSideNav();
+  
+  // Force show the login overlay immediately to hide dashboard while Firebase checks auth status
+  showLoginOverlay();
   checkAuth(); // This will trigger initDashboard when auth state is resolved
 };
 
