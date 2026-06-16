@@ -1243,6 +1243,7 @@ const initializeApp = () => {
 
   // Main Dashboard Setup
   const initDashboard = () => {
+    if (!contractsListContainer) return;
 
     updateStats();
     renderContractsList();
