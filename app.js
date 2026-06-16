@@ -208,7 +208,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     const btnFirebaseGoogleLogin = document.getElementById("btn-firebase-google-login");
-    const customLoginError = document.getElementById("custom-login-error");
 
     if (btnFirebaseGoogleLogin) {
       btnFirebaseGoogleLogin.addEventListener("click", () => {
