@@ -80,3 +80,20 @@ const CONTRACTS_DB = [
 ];
 
 const MOCK_COMPARE_DATA = {};
+
+// Database of Users
+let USERS_DB = JSON.parse(localStorage.getItem("GHN_USERS_DB"));
+if (!USERS_DB || !Array.isArray(USERS_DB)) {
+  USERS_DB = [];
+}
+
+// Ensure namnh@ghn.vn is super_admin and clean up old mock admin
+USERS_DB = USERS_DB.filter(u => u.email !== "admin@ghn.vn");
+const namnhIndex = USERS_DB.findIndex(u => u.email === "namnh@ghn.vn");
+if (namnhIndex >= 0) {
+  USERS_DB[namnhIndex].role = "super_admin";
+  USERS_DB[namnhIndex].name = "Nguyễn Hữu Nam";
+} else {
+  USERS_DB.unshift({ email: "namnh@ghn.vn", name: "Nguyễn Hữu Nam", role: "super_admin", avatar: "NHN" });
+}
+localStorage.setItem("GHN_USERS_DB", JSON.stringify(USERS_DB));

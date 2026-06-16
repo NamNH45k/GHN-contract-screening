@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const VALID_TEMPLATE_IDS = Object.keys(TEMPLATE_MAP);
 
   // SEC-001: Valid role whitelist
-  const VALID_ROLES = ["admin", "reviewer", "sale"];
+  const VALID_ROLES = ["super_admin", "admin", "user"];
 
   // SEC-011: Session expiry duration (8 hours in milliseconds)
   const SESSION_MAX_AGE_MS = 8 * 60 * 60 * 1000;
@@ -93,15 +93,21 @@ document.addEventListener("DOMContentLoaded", () => {
         userAvatarEl.textContent = currentUser.avatar || "?";
         userAvatarEl.className = "user-avatar " + currentUser.role;
       }
-      if (userDisplayNameEl) userDisplayNameEl.textContent = currentUser.name;
+      if (userDisplayNameEl) userDisplayNameEl.textContent = currentUser.email;
       if (userDisplayRoleEl) {
         userDisplayRoleEl.textContent = 
-          currentUser.role === "admin" ? "Admin" :
-          currentUser.role === "reviewer" ? "Reviewer" : "Business User";
+          currentUser.role === "super_admin" ? "Super Admin" :
+          currentUser.role === "admin" ? "Admin" : "User";
         userDisplayRoleEl.className = "role-badge " + currentUser.role;
+      }
+      const navUsers = document.getElementById("nav-users");
+      if (navUsers) {
+        navUsers.style.display = (currentUser.role === "super_admin" || currentUser.role === "admin") ? "block" : "none";
       }
     } else {
       if (profileSection) profileSection.style.display = "none";
+      const navUsers = document.getElementById("nav-users");
+      if (navUsers) navUsers.style.display = "none";
     }
   };
 
@@ -128,7 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const loginUser = (userObj) => {
     // SEC-001: Enforce role whitelist and add login timestamp for session expiry
     if (!VALID_ROLES.includes(userObj.role)) {
-      userObj.role = "sale"; // Default to least privilege
+      userObj.role = "user"; // Default to least privilege
     }
     userObj.loginTime = Date.now();
     currentUser = userObj;
@@ -170,17 +176,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    accountItems.forEach(item => {
-      item.addEventListener("click", () => {
-        const email = item.getAttribute("data-email");
-        const name = item.getAttribute("data-name");
-        const avatar = item.getAttribute("data-avatar");
-        const role = item.getAttribute("data-role");
-        
-        loginUser({ email, name, avatar, role });
-        if (oauthModal) oauthModal.style.display = "none";
-      });
-    });
+
 
     if (btnCustomLoginSubmit && customEmailInput) {
       btnCustomLoginSubmit.addEventListener("click", () => {
@@ -213,16 +209,19 @@ document.addEventListener("DOMContentLoaded", () => {
         // Reset attempt counter on valid domain
         loginAttemptCount = 0;
 
-        const namePart = email.split("@")[0];
-        // Capitalize first letters for name
-        const name = namePart.split(/[-_.]/).map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
-        const initials = namePart.split(/[-_.]/).map(word => word.charAt(0).toUpperCase()).join("").substring(0, 3);
-        
+        const foundUser = typeof USERS_DB !== "undefined" ? USERS_DB.find(u => u.email === email) : null;
+        if (!foundUser) {
+          if (customLoginError) {
+            customLoginError.textContent = "Tài khoản chưa được mời vào hệ thống!";
+            customLoginError.style.display = "block";
+          }
+          return;
+        }
+
         loginUser({
-          email: email,
-          name: name,
-          avatar: initials || "GHN",
-          role: "sale" // Default custom logins to Business User
+          email: foundUser.email,
+          avatar: foundUser.avatar || foundUser.email.substring(0, 2).toUpperCase(),
+          role: foundUser.role
         });
         
         if (oauthModal) oauthModal.style.display = "none";
