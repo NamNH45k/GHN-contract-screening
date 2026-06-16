@@ -209,7 +209,16 @@ document.addEventListener("DOMContentLoaded", () => {
         // Reset attempt counter on valid domain
         loginAttemptCount = 0;
 
-        const foundUser = typeof USERS_DB !== "undefined" ? USERS_DB.find(u => u.email === email) : null;
+        // Always read latest DB from localStorage to prevent cross-tab sync issues
+        let currentDb = typeof USERS_DB !== "undefined" ? USERS_DB : [];
+        try {
+          const stored = localStorage.getItem("GHN_USERS_DB");
+          if (stored) {
+            currentDb = JSON.parse(stored);
+          }
+        } catch(e) {}
+        
+        const foundUser = currentDb.find(u => u.email.trim().toLowerCase() === email);
         if (!foundUser) {
           if (customLoginError) {
             customLoginError.textContent = "Tài khoản chưa được mời vào hệ thống!";
