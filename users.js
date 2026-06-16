@@ -1,25 +1,45 @@
+import { auth, onAuthStateChanged, db, collection, getDocs, setDoc, deleteDoc, doc } from "./firebase_setup.js";
+
 document.addEventListener("DOMContentLoaded", () => {
-  // Check authorization
-  const savedUserStr = localStorage.getItem("GHN_USER");
-  let hasAccess = false;
   let loggedInUser = null;
-
-  if (savedUserStr) {
-    try {
-      loggedInUser = JSON.parse(savedUserStr);
-      if (loggedInUser && (loggedInUser.role === "super_admin" || loggedInUser.role === "admin")) {
-        hasAccess = true;
-      }
-    } catch (e) {
-      console.error("Error parsing user:", e);
+  
+  onAuthStateChanged(auth, async (user) => {
+    if (!user || !user.email.endsWith("@ghn.vn")) {
+      alert("Bạn không có quyền truy cập trang này.");
+      window.location.href = "index.html";
+      return;
     }
-  }
-
-  if (!hasAccess) {
-    alert("Bạn không có quyền truy cập trang này.");
-    window.location.href = "index.html";
-    return;
-  }
+    
+    // Check role in Firestore
+    try {
+      const userDocSnap = await getDocs(collection(db, "users"));
+      let hasAccess = false;
+      
+      userDocSnap.forEach(docSnap => {
+        if (docSnap.id === user.email) {
+          const uData = docSnap.data();
+          if (uData.role === "super_admin" || uData.role === "admin") {
+            hasAccess = true;
+            loggedInUser = uData;
+          }
+        }
+      });
+      
+      if (!hasAccess) {
+        alert("Bạn không có quyền truy cập trang này.");
+        window.location.href = "index.html";
+        return;
+      }
+      
+      // Load users
+      renderUsers();
+      
+    } catch (e) {
+      console.error(e);
+      alert("Lỗi tải phân quyền.");
+      window.location.href = "index.html";
+    }
+  });
 
   // SEC-002: Escape HTML to prevent XSS
   const escapeHtml = (text) => {
@@ -40,62 +60,70 @@ document.addEventListener("DOMContentLoaded", () => {
   const inviteRoleSelect = document.getElementById("invite-role");
   const inviteError = document.getElementById("invite-error");
 
-  const renderUsers = () => {
+  const renderUsers = async () => {
     if (!tableBody) return;
-    tableBody.innerHTML = "";
+    tableBody.innerHTML = "<tr><td colspan='3'>Đang tải...</td></tr>";
 
-    USERS_DB.forEach((user, index) => {
-      const tr = document.createElement("tr");
+    try {
+      const usersSnap = await getDocs(collection(db, "users"));
+      const usersList = [];
+      usersSnap.forEach(doc => usersList.push(doc.data()));
 
-      let roleDisplay = "User";
-      let roleClass = "user";
-      if (user.role === "super_admin") {
-        roleDisplay = "Super Admin";
-        roleClass = "super_admin";
-      } else if (user.role === "admin") {
-        roleDisplay = "Admin";
-        roleClass = "admin";
-      }
+      tableBody.innerHTML = "";
+      
+      usersList.forEach((user, index) => {
+        const tr = document.createElement("tr");
 
-      // Check delete permission
-      let canDelete = false;
-      if (loggedInUser.email !== user.email) {
-        if (loggedInUser.role === "super_admin") {
-          canDelete = true;
-        } else if (loggedInUser.role === "admin" && user.role === "user") {
-          canDelete = true; // Admin can only delete users
+        let roleDisplay = "User";
+        let roleClass = "user";
+        if (user.role === "super_admin") {
+          roleDisplay = "Super Admin";
+          roleClass = "super_admin";
+        } else if (user.role === "admin") {
+          roleDisplay = "Admin";
+          roleClass = "admin";
         }
-      }
 
-      tr.innerHTML = `
-        <td>
-          <div class="user-name-col">
-            <div class="avatar-sm" style="background: ${getAvatarColor(user.role)}">${escapeHtml(user.avatar || user.email.substring(0, 2).toUpperCase())}</div>
-            <span style="font-weight: 600; color: var(--text-primary);">${escapeHtml(user.email)}</span>
-          </div>
-        </td>
-        <td>
-          <span class="badge-role ${roleClass}">${roleDisplay}</span>
-        </td>
-        <td style="text-align: right;">
-          ${canDelete ? `<button class="btn-delete" data-index="${index}">Xóa</button>` : `<span style="font-size:0.75rem; color: var(--text-muted);">Không thể xóa</span>`}
-        </td>
-      `;
-      tableBody.appendChild(tr);
-    });
-
-    // Bind delete events
-    const deleteBtns = document.querySelectorAll(".btn-delete");
-    deleteBtns.forEach(btn => {
-      btn.addEventListener("click", (e) => {
-        const index = e.target.getAttribute("data-index");
-        if (confirm("Bạn có chắc chắn muốn xóa người dùng này?")) {
-          USERS_DB.splice(index, 1);
-          localStorage.setItem("GHN_USERS_DB", JSON.stringify(USERS_DB));
-          renderUsers();
+        let canDelete = false;
+        if (loggedInUser.email !== user.email) {
+          if (loggedInUser.role === "super_admin") {
+            canDelete = true;
+          } else if (loggedInUser.role === "admin" && user.role === "user") {
+            canDelete = true;
+          }
         }
+
+        tr.innerHTML = `
+          <td>
+            <div class="user-name-col">
+              <div class="avatar-sm" style="background: ${getAvatarColor(user.role)}">${escapeHtml(user.avatar || user.email.substring(0, 2).toUpperCase())}</div>
+              <span style="font-weight: 600; color: var(--text-primary);">${escapeHtml(user.email)}</span>
+            </div>
+          </td>
+          <td>
+            <span class="badge-role ${roleClass}">${roleDisplay}</span>
+          </td>
+          <td style="text-align: right;">
+            ${canDelete ? `<button class="btn-delete" data-email="${user.email}">Xóa</button>` : `<span style="font-size:0.75rem; color: var(--text-muted);">Không thể xóa</span>`}
+          </td>
+        `;
+        tableBody.appendChild(tr);
       });
-    });
+
+      const deleteBtns = document.querySelectorAll(".btn-delete");
+      deleteBtns.forEach(btn => {
+        btn.addEventListener("click", async (e) => {
+          const emailToDelete = e.target.getAttribute("data-email");
+          if (confirm("Bạn có chắc chắn muốn xóa người dùng này?")) {
+            await deleteDoc(doc(db, "users", emailToDelete));
+            renderUsers();
+          }
+        });
+      });
+    } catch (err) {
+      console.error(err);
+      tableBody.innerHTML = "<tr><td colspan='3'>Lỗi tải danh sách người dùng.</td></tr>";
+    }
   };
 
   const getAvatarColor = (role) => {
@@ -123,7 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Submit Invite
   if (btnInviteSubmit) {
-    btnInviteSubmit.addEventListener("click", () => {
+    btnInviteSubmit.addEventListener("click", async () => {
       inviteError.style.display = "none";
       const email = inviteEmailInput.value.trim().toLowerCase();
       const role = inviteRoleSelect.value;
@@ -134,35 +162,40 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      const existingUser = USERS_DB.find(u => u.email === email);
-      if (existingUser) {
-        inviteError.textContent = "Email này đã tồn tại trong hệ thống.";
-        inviteError.style.display = "block";
-        return;
-      }
-
       if (loggedInUser.role === "admin" && (role === "super_admin" || role === "admin")) {
         inviteError.textContent = "Admin chỉ có thể mời tài khoản với quyền User.";
         inviteError.style.display = "block";
         return;
       }
 
-      const initials = email.substring(0, 2).toUpperCase();
+      try {
+        const userRef = doc(db, "users", email);
+        const existing = await getDocs(collection(db, "users"));
+        let exists = false;
+        existing.forEach(d => { if (d.id === email) exists = true; });
+        
+        if (exists) {
+          inviteError.textContent = "Email này đã tồn tại trong hệ thống.";
+          inviteError.style.display = "block";
+          return;
+        }
 
-      const newUser = {
-        email: email,
-        avatar: initials,
-        role: role
-      };
-
-      USERS_DB.push(newUser);
-      localStorage.setItem("GHN_USERS_DB", JSON.stringify(USERS_DB));
-      
-      inviteModal.style.display = "none";
-      renderUsers();
+        const initials = email.substring(0, 2).toUpperCase();
+        await setDoc(userRef, {
+          email: email,
+          avatar: initials,
+          role: role
+        });
+        
+        inviteModal.style.display = "none";
+        renderUsers();
+      } catch (e) {
+        console.error(e);
+        inviteError.textContent = "Lỗi khi mời người dùng.";
+        inviteError.style.display = "block";
+      }
     });
   }
 
-  // Initial render
-  renderUsers();
+
 });

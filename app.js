@@ -1,3 +1,5 @@
+import { auth, provider, signInWithPopup, onAuthStateChanged, signOut, db, collection, doc, getDoc, setDoc } from "./firebase_setup.js";
+
 document.addEventListener("DOMContentLoaded", () => {
   // ==========================================================================
   // STATE MANAGEMENT
@@ -122,35 +124,62 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const checkAuth = () => {
-    if (!currentUser) {
-      showLoginOverlay();
-      return false;
-    }
-    hideLoginOverlay();
-    updateProfileUI();
-    return true;
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        if (!user.email.endsWith("@ghn.vn")) {
+          alert("Chỉ chấp nhận email tên miền @ghn.vn!");
+          signOut(auth);
+          return;
+        }
+
+        try {
+          const userDocRef = doc(db, "users", user.email);
+          const userDocSnap = await getDoc(userDocRef);
+
+          if (!userDocSnap.exists()) {
+            if (user.email === "namnh@ghn.vn") {
+              await setDoc(userDocRef, {
+                email: user.email,
+                role: "super_admin",
+                avatar: user.email.substring(0, 2).toUpperCase()
+              });
+              currentUser = { email: user.email, role: "super_admin", avatar: user.email.substring(0, 2).toUpperCase() };
+            } else {
+              alert("Tài khoản chưa được mời vào hệ thống!");
+              signOut(auth);
+              return;
+            }
+          } else {
+            currentUser = userDocSnap.data();
+            if (!VALID_ROLES.includes(currentUser.role)) {
+              currentUser.role = "user";
+            }
+          }
+
+          hideLoginOverlay();
+          updateProfileUI();
+          initDashboard();
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+          alert("Có lỗi xảy ra khi tải dữ liệu người dùng.");
+          signOut(auth);
+        }
+      } else {
+        currentUser = null;
+        showLoginOverlay();
+        updateProfileUI();
+      }
+    });
   };
 
-  const loginUser = (userObj) => {
-    // SEC-001: Enforce role whitelist and add login timestamp for session expiry
-    if (!VALID_ROLES.includes(userObj.role)) {
-      userObj.role = "user"; // Default to least privilege
-    }
-    userObj.loginTime = Date.now();
-    currentUser = userObj;
-    localStorage.setItem("GHN_USER", JSON.stringify(currentUser));
-    updateProfileUI();
-    hideLoginOverlay();
-    
-    // Clear selections and re-initialize
-    activeContractId = null;
-    initDashboard();
-  };
+
 
   const logoutUser = () => {
-    currentUser = null;
-    localStorage.removeItem("GHN_USER");
-    window.location.reload();
+    signOut(auth).then(() => {
+      window.location.reload();
+    }).catch((error) => {
+      console.error("Lỗi đăng xuất:", error);
+    });
   };
 
   const setupAuthEventListeners = () => {
@@ -178,63 +207,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-    if (btnCustomLoginSubmit && customEmailInput) {
-      btnCustomLoginSubmit.addEventListener("click", () => {
-        // SEC-012: Rate limiting — block after 5 failed attempts for 60 seconds
-        if (Date.now() < loginLockoutUntil) {
-          const remainSec = Math.ceil((loginLockoutUntil - Date.now()) / 1000);
-          if (customLoginError) {
-            customLoginError.textContent = `Quá nhiều lần thử. Vui lòng đợi ${remainSec} giây.`;
-            customLoginError.style.display = "block";
-          }
-          return;
-        }
+    const btnFirebaseGoogleLogin = document.getElementById("btn-firebase-google-login");
+    const customLoginError = document.getElementById("custom-login-error");
 
-        const email = customEmailInput.value.trim().toLowerCase();
+    if (btnFirebaseGoogleLogin) {
+      btnFirebaseGoogleLogin.addEventListener("click", () => {
         if (customLoginError) customLoginError.style.display = "none";
-
-        if (!email.endsWith("@ghn.vn")) {
-          loginAttemptCount++;
-          if (loginAttemptCount >= 5) {
-            loginLockoutUntil = Date.now() + 60000; // Lock 60 seconds
-            loginAttemptCount = 0;
-          }
+        signInWithPopup(auth, provider).catch((error) => {
+          console.error("Lỗi đăng nhập Google:", error);
           if (customLoginError) {
-            customLoginError.textContent = "Chỉ chấp nhận email tên miền @ghn.vn!";
+            customLoginError.textContent = "Lỗi đăng nhập: " + error.message;
             customLoginError.style.display = "block";
           }
-          return;
-        }
-
-        // Reset attempt counter on valid domain
-        loginAttemptCount = 0;
-
-        // Always read latest DB from localStorage to prevent cross-tab sync issues
-        let currentDb = typeof USERS_DB !== "undefined" ? USERS_DB : [];
-        try {
-          const stored = localStorage.getItem("GHN_USERS_DB");
-          if (stored) {
-            currentDb = JSON.parse(stored);
-          }
-        } catch(e) {}
-        
-        const foundUser = currentDb.find(u => u.email.trim().toLowerCase() === email);
-        if (!foundUser) {
-          if (customLoginError) {
-            customLoginError.textContent = "Tài khoản chưa được mời vào hệ thống!";
-            customLoginError.style.display = "block";
-          }
-          return;
-        }
-
-        loginUser({
-          email: foundUser.email,
-          avatar: foundUser.avatar || foundUser.email.substring(0, 2).toUpperCase(),
-          role: foundUser.role
         });
-        
-        if (oauthModal) oauthModal.style.display = "none";
-        customEmailInput.value = "";
       });
     }
 
@@ -1319,7 +1304,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Main Dashboard Setup
   const initDashboard = () => {
-    if (!checkAuth()) return;
 
     updateStats();
     renderContractsList();
@@ -1556,5 +1540,5 @@ document.addEventListener("DOMContentLoaded", () => {
   // Start
   setupAuthEventListeners();
   setupCompareSideNav();
-  initDashboard();
+  checkAuth(); // This will trigger initDashboard when auth state is resolved
 });
