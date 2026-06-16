@@ -1240,7 +1240,7 @@ document.addEventListener("DOMContentLoaded", () => {
       timelineEl.innerHTML += `
         <div class="timeline-item success">
           <div class="timeline-title">Đã tiếp nhận từ Chrome Extension</div>
-          <div class="timeline-desc">Tải thành công tệp đính kèm lúc ${contract.receivedDate}.</div>
+          <div class="timeline-desc">Tải thành công tệp đính kèm lúc ${escapeHtml(contract.receivedDate)}.</div>
         </div>
       `;
 

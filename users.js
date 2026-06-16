@@ -21,6 +21,16 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
+  // SEC-002: Escape HTML to prevent XSS
+  const escapeHtml = (text) => {
+    return (text || "").toString()
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  };
+
   const tableBody = document.getElementById("users-table-body");
   const inviteModal = document.getElementById("invite-modal");
   const btnOpenInvite = document.getElementById("btn-open-invite");
@@ -60,8 +70,8 @@ document.addEventListener("DOMContentLoaded", () => {
       tr.innerHTML = `
         <td>
           <div class="user-name-col">
-            <div class="avatar-sm" style="background: ${getAvatarColor(user.role)}">${user.avatar || user.email.substring(0, 2).toUpperCase()}</div>
-            <span style="font-weight: 600; color: var(--text-primary);">${user.email}</span>
+            <div class="avatar-sm" style="background: ${getAvatarColor(user.role)}">${escapeHtml(user.avatar || user.email.substring(0, 2).toUpperCase())}</div>
+            <span style="font-weight: 600; color: var(--text-primary);">${escapeHtml(user.email)}</span>
           </div>
         </td>
         <td>
